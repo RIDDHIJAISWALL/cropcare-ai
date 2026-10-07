@@ -1,0 +1,73 @@
+// Prisma Data Source & Generator
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ─── Users ────────────────────────────────────────────────────
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("farmer") // "farmer" | "admin"
+  location  String?
+  createdAt DateTime @default(now())
+
+  cropPredictions    CropPrediction[]
+  diseasePredictions DiseasePrediction[]
+}
+
+// ─── Crop Recommendation Predictions ─────────────────────────
+model CropPrediction {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  nitrogen    Float
+  phosphorus  Float
+  potassium   Float
+  temperature Float
+  humidity    Float
+  ph          Float
+  rainfall    Float
+  predictedCrop String
+  confidence    Float
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// ─── Plant Disease Detection Predictions ─────────────────────
+model DiseasePrediction {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  plantName       String
+  imageUrl        String
+  predictedDisease String
+  confidence       Float
+  createdAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// ─── Static Crop Info (for reference pages) ──────────────────
+model Crop {
+  id               Int    @id @default(autoincrement())
+  cropName         String @unique
+  description      String
+  soilRequirements String
+  waterRequirements String
+  season           String
+}
+
+// ─── Static Disease Info (for reference pages) ───────────────
+model Disease {
+  id         Int    @id @default(autoincrement())
+  plantName  String
+  diseaseName String
+  symptoms   String
+  prevention String
+}
